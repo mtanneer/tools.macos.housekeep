@@ -19,9 +19,12 @@ public struct ToolAvailability: Sendable, Equatable {
 /// the GUI's soft-lock banner. `pathSearch` is injectable so tests don't depend on the test
 /// machine's actual install state.
 public enum SecurityToolDetector {
-    /// Blocking — safe for the CLI's single-threaded execution and for tests (which inject a
-    /// non-blocking closure), but never call this from the main actor: use ``checkAsync()``
-    /// from GUI code, since the default search blocks on `ProcessRunner.run`.
+    /// GUI apps are launched by launchd/Finder with a minimal `PATH` that doesn't include
+    /// Homebrew's install dirs (unlike a login shell's `PATH`), so a `which`-style subprocess
+    /// lookup silently fails there even when the tool is installed. Checking these well-known
+    /// locations directly, in addition to `$PATH`, works regardless of how the process launched.
+    private static let knownInstallDirs = ["/opt/homebrew/bin", "/usr/local/bin"]
+
     public static func check(pathSearch: (String) -> Bool = defaultPathSearch) -> ToolAvailability {
         ToolAvailability(
             hasGitleaks: pathSearch("gitleaks"),
@@ -29,28 +32,17 @@ public enum SecurityToolDetector {
         )
     }
 
-    /// GUI-safe variant: runs the same lookup off the calling thread via `ProcessRunner.runAsync`.
+    /// GUI-safe variant; same lookup logic, just spelled `async` since it's called from the
+    /// main actor and doing filesystem `stat` calls there is fine (no subprocess involved).
     public static func checkAsync() async -> ToolAvailability {
-        async let gitleaks = asyncPathSearch("gitleaks")
-        async let osv = asyncPathSearch("osv-scanner")
-        return await ToolAvailability(hasGitleaks: gitleaks, hasOSVScanner: osv)
+        check()
     }
 
     public static func defaultPathSearch(_ executable: String) -> Bool {
-        guard let output = ProcessRunner.run(
-            executablePath: "/usr/bin/which",
-            arguments: [executable],
-            timeout: 5
-        ) else { return false }
-        return output.succeeded
-    }
-
-    private static func asyncPathSearch(_ executable: String) async -> Bool {
-        guard let output = await ProcessRunner.runAsync(
-            executablePath: "/usr/bin/which",
-            arguments: [executable],
-            timeout: 5
-        ) else { return false }
-        return output.succeeded
+        let searchDirs = (ProcessInfo.processInfo.environment["PATH"]?.split(separator: ":").map(String.init) ?? [])
+            + knownInstallDirs
+        return searchDirs.contains { dir in
+            FileManager.default.isExecutableFile(atPath: dir + "/" + executable)
+        }
     }
 }
