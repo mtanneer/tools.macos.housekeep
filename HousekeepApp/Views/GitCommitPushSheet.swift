@@ -27,9 +27,9 @@ struct GitCommitPushSheet: View {
                 Spacer()
                 Button("Close", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
-                Button("Commit") { commit() }
+                Button("Commit") { Task { await commit() } }
                     .disabled(message.isEmpty)
-                Button("Push") { push() }
+                Button("Push") { Task { await push() } }
                     .disabled(repo.upstream == "NONE")
             }
         }
@@ -37,14 +37,14 @@ struct GitCommitPushSheet: View {
         .frame(width: 420)
     }
 
-    private func commit() {
-        let succeeded = GitActions.commit(repo: repoPath, message: message)
+    private func commit() async {
+        let succeeded = await GitActions.commit(repo: repoPath, message: message)
         statusText = succeeded ? "Committed." : "Commit failed."
         if succeeded { message = "" }
     }
 
-    private func push() {
-        let succeeded = GitActions.push(repo: repoPath, hasUpstream: repo.upstream != "NONE")
+    private func push() async {
+        let succeeded = await GitActions.push(repo: repoPath, hasUpstream: repo.upstream != "NONE")
         statusText = succeeded ? "Pushed." : "Push failed."
     }
 }

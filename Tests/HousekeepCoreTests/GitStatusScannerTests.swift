@@ -27,7 +27,7 @@ struct GitStatusScannerTests {
 
         let status = await GitStatusScanner.status(of: fixture.repoPath, root: fixture.root)
         // fixture has one dirty file by default; commit it to simulate a clean repo.
-        _ = GitActions.commit(repo: fixture.repoPath, message: "commit the dirty file")
+        _ = await GitActions.commit(repo: fixture.repoPath, message: "commit the dirty file")
         let cleanStatus = await GitStatusScanner.status(of: fixture.repoPath, root: fixture.root)
 
         #expect(status.dirty == 1)

@@ -75,7 +75,7 @@ final class HousekeepStore: ObservableObject {
 
     func scanSecurity(root: String) async {
         securityPhase = .scanning
-        let availability = SecurityToolDetector.check()
+        let availability = await SecurityToolDetector.checkAsync()
         toolAvailability = availability
         let report = await SecurityScanner.scan(root: root, availability: availability)
         securityReport = report

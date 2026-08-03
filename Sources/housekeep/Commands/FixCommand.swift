@@ -49,19 +49,19 @@ enum FixCommand {
 
             switch action {
             case "s":
-                print(GitActions.status(repo: proj))
+                print(await GitActions.status(repo: proj))
             case "d":
-                print(GitActions.diff(repo: proj))
+                print(await GitActions.diff(repo: proj))
             case "c":
                 print("  commit message: ", terminator: "")
                 if let message = readLine(), !message.isEmpty {
-                    _ = GitActions.commit(repo: proj, message: message)
+                    _ = await GitActions.commit(repo: proj, message: message)
                 }
             case "p":
                 if status.upstream == "NONE" {
                     print("  no upstream configured, skipping push")
                 } else {
-                    _ = GitActions.push(repo: proj, hasUpstream: true)
+                    _ = await GitActions.push(repo: proj, hasUpstream: true)
                 }
             default:
                 break
