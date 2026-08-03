@@ -1,0 +1,5 @@
+.build/
+.swiftpm/
+DerivedData/
+Housekeep.xcodeproj/
+Config/Signing.xcconfig
