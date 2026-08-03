@@ -1,0 +1,52 @@
+name: Housekeep
+options:
+  bundleIdPrefix: com.mtanneer
+  deploymentTarget:
+    macOS: "13.0"
+
+packages:
+  HousekeepCore:
+    path: .
+
+targets:
+  Housekeep:
+    type: application
+    platform: macOS
+    sources:
+      - path: HousekeepApp
+    dependencies:
+      - package: HousekeepCore
+        product: HousekeepCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.mtanneer.housekeep
+        PRODUCT_NAME: Housekeep
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_FILE: HousekeepApp/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: NO
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY[sdk=macosx*]: "Developer ID Application"
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+      configs:
+        Debug:
+          CODE_SIGN_IDENTITY: "-"
+          CODE_SIGN_IDENTITY[sdk=macosx*]: "-"
+          CODE_SIGN_STYLE: Automatic
+          DEVELOPMENT_TEAM: ""
+    configFiles:
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
+
+schemes:
+  Housekeep:
+    build:
+      targets:
+        Housekeep: all
+    run:
+      config: Debug
+    archive:
+      config: Release
