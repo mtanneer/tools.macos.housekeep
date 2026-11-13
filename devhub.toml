@@ -1,0 +1,8 @@
+# devhub project manifest. Schema: ~/dev/tools.all.devhub/SCHEMA.md
+status = "maintenance"
+purpose = "Audits a dev folder for reclaimable space, leaked secrets, vulnerable deps and git hygiene"
+tags = ["devtools"]
+deploy = ""
+depends_on = []
+next = ["Set up Homebrew formula + cask + CI", "Security remediation view in GUI", "Wire up Settings and excluded paths UI", "Loading state on git commit/push sheet"]
+# evidence: CLAUDE.md, _batch4.json
